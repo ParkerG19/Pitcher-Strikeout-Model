@@ -30,6 +30,7 @@ class Pitcher():
         self.url = "https://www.baseball-reference.com/"
         self.driver = driver
         self.searchBar = None
+        self.openPlayerPage() # upon instantiation - the standard player page will get opened for further investigation
 
     def openPlayerPage(self):
         self.driver.get(self.url)
@@ -44,9 +45,8 @@ class Pitcher():
     def currentURL(self):
         return self.driver.current_url()
 
-    def gettingPlayerID(self):
+    def gettingPlayerID(self):  # Get the player id from the URL to search other cast off webpages
         url = self.driver.current_url
-        print(url)
         pattern = r'/players/.+?/(.+?)\.shtml' # Using regular expression to extract ID from original URL for player
         match = re.search(pattern, url)
         if match:
@@ -56,16 +56,18 @@ class Pitcher():
             result = "Could not find player"
             return result
 
-    def thisYearPage(self):
+    def thisYearPage(self): # gets the URL of this years game logs for that pitcher
         idPartOfURL = self.gettingPlayerID()
         foundationURL = "https://www.baseball-reference.com/players/gl.fcgi?id="
         fullURL = foundationURL + idPartOfURL + "&year=2023&t=p"
         return fullURL
 
-    def newYearNavigation(self):
+    def newYearNavigation(self):  # navigates driver to open the game log webpage for the player
         self.driver.get(self.thisYearPage())
 
-    def gettingGamgeLogs(self):
+    def gettingGamgeLogs(self):  # navigates and scrapes the game logs and returns them in a pandas dataframe
+
+        self.newYearNavigation() # Opening the page that contains the game logs for the player
         table = self.driver.find_element(By.XPATH, "//table[@id='pitching_gamelogs']")
 
         # Get all rows within the table.
@@ -94,13 +96,13 @@ class Pitcher():
 
         return df  # This returns data frame of all stats from the given players game log in the 2023 season
 
-pitcher = Pitcher("Shohei Ohtani", driver)
-pitcher.openPlayerPage()
-pitcher.newYearNavigation()
-gameLogs = pitcher.gettingGamgeLogs()
-
-print(gameLogs['SO'])
-# pitcher.gettingPlayerID()
-
-input("Press Enter to exit...")
+# pitcher = Pitcher("Shohei Ohtani", driver)
+# pitcher.openPlayerPage()
+# pitcher.newYearNavigation()
+# gameLogs = pitcher.gettingGamgeLogs()
+#
+# print(gameLogs['SO'])
+# # pitcher.gettingPlayerID()
+#
+# input("Press Enter to exit...")
 
